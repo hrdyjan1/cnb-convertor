@@ -1,21 +1,19 @@
 import { StyleSheet, View } from 'react-native';
-import { ConversionForm } from './src/features/finance/components/ConversionForm';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { RootNavigator } from './src/app/navigation/RootNavigator';
 
 function App() {
   return (
-    <View style={styles.container}>
-      <ConversionForm />
-    </View>
+    <SafeAreaProvider>
+      <View style={styles.container}>
+        <RootNavigator />
+      </View>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    padding: 20,
-  },
+  container: { flex: 1, backgroundColor: '#fff' },
 });
 
 export default App;
