@@ -1,14 +1,17 @@
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootNavigator } from './src/app/navigation/RootNavigator';
+import { QueryProvider } from './src/app/providers/QueryProvider';
 
 function App() {
   return (
-    <SafeAreaProvider>
-      <View style={styles.container}>
-        <RootNavigator />
-      </View>
-    </SafeAreaProvider>
+    <QueryProvider>
+      <SafeAreaProvider>
+        <View style={styles.container}>
+          <RootNavigator />
+        </View>
+      </SafeAreaProvider>
+    </QueryProvider>
   );
 }
 

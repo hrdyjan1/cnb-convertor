@@ -1,37 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { fetchCnbRates } from '../api/fetchCnbRates';
 import type { RatesResponse } from '../types';
 
 function useCnbRates() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<unknown | null>(null);
-  const [data, setData] = useState<RatesResponse | null>(null);
+  const query = useQuery<RatesResponse>({
+    queryKey: ['cnbRates'],
+    queryFn: fetchCnbRates,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    enabled: true,
+    refetchInterval: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadCnbRates() {
-      setError(null);
-      setIsLoading(true);
-
-      try {
-        const data = await fetchCnbRates();
-        if (isMounted) setData(data);
-      } catch (error) {
-        setError(error instanceof Error ? error : new Error('Unknown error'));
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadCnbRates();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  return { data, error, isLoading };
+  return query;
 }
 
 export { useCnbRates };
