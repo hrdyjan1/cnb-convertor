@@ -1,23 +1,21 @@
 import { Platform } from 'react-native';
 import * as v from 'valibot';
+import { API_CONFIG, API_ENDPOINTS } from '../../../config/api';
 import { toNumber } from '../../../utils/toNumber';
 import { RateSchema, RatesResponseSchema } from '../schema/cnbSchema';
 
-const HEADER_LINES = 1;
-const DELIMITER = '|';
-const CNB_URL =
-  'https://www.cnb.cz/en/financial-markets/foreign-exchange-market/' +
-  'central-bank-exchange-rate-fixing/central-bank-exchange-rate-fixing/daily.txt';
-const CORS_PROXY = 'https://corsproxy.io/?';
-
 function getCnbUrl(): string {
-  return Platform.OS === 'web'
-    ? `${CORS_PROXY}${encodeURIComponent(CNB_URL)}`
-    : CNB_URL;
+  if (Platform.OS === 'web') {
+    if (__DEV__) {
+      return `${API_ENDPOINTS.CNB_RATES.CORS_PROXY}${encodeURIComponent(API_ENDPOINTS.CNB_RATES.DIRECT)}`;
+    }
+    return '/api/cnb-rates';
+  }
+  return API_ENDPOINTS.CNB_RATES.DIRECT;
 }
 
 function parseRateLine(line: string) {
-  const parts = line.split(DELIMITER);
+  const parts = line.split(API_CONFIG.RATE_DELIMITER);
 
   if (parts.length !== 5) {
     throw new Error(`Invalid rate line: "${line}"`);
@@ -36,7 +34,7 @@ function parseRateLine(line: string) {
 
 function parseRatesText(text: string) {
   const [date, ...lines] = text.trim().split('\n');
-  const rates = lines.slice(HEADER_LINES).map(parseRateLine);
+  const rates = lines.slice(API_CONFIG.HEADER_LINES).map(parseRateLine);
 
   return { date, base: 'CZK' as const, rates };
 }
