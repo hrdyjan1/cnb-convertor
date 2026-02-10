@@ -1,43 +1,62 @@
 import type { PropsWithChildren } from 'react';
-import { type StyleProp, StyleSheet, Text, type ViewStyle } from 'react-native';
+import { ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import styled from 'styled-components/native';
 
 interface BaseScreenProps extends PropsWithChildren {
   isLoading?: boolean;
   loadingText?: string;
-  error?: unknown;
-  containerStyle?: StyleProp<ViewStyle>;
+  error?: Error | null;
 }
+
+const Container = styled(SafeAreaView)`
+  flex: 1;
+  padding: 16px;
+  background-color: #fff;
+`;
+
+const Centered = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+`;
+
+const LoadingText = styled.Text`
+  margin-top: 12px;
+  font-size: 14px;
+  color: #666;
+`;
+
+const ErrorText = styled.Text`
+  color: #d00;
+  font-size: 15px;
+  text-align: center;
+`;
 
 function BaseScreen({
   error,
   children,
   isLoading,
   loadingText = 'Loading...',
-  containerStyle,
 }: BaseScreenProps) {
-  if (isLoading) {
-    return <Text>{loadingText}</Text>;
-  }
-
-  if (error) {
-    return (
-      <Text style={styles.redText}>
-        {error instanceof Error ? error.message : 'Unknown error'}
-      </Text>
-    );
-  }
-
   return (
-    <SafeAreaView edges={['bottom']} style={[styles.container, containerStyle]}>
-      {children}
-    </SafeAreaView>
+    <Container edges={['bottom']}>
+      {isLoading ? (
+        <Centered>
+          <ActivityIndicator size="large" />
+          <LoadingText>{loadingText}</LoadingText>
+        </Centered>
+      ) : error ? (
+        <Centered>
+          <ErrorText>
+            {error instanceof Error ? error.message : 'Unknown error'}
+          </ErrorText>
+        </Centered>
+      ) : (
+        children
+      )}
+    </Container>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  redText: { color: 'red' },
-});
 
 export { BaseScreen };

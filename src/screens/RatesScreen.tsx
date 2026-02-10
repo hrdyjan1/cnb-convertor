@@ -1,60 +1,80 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList } from 'react-native';
+import styled from 'styled-components/native';
 import { BaseScreen } from '../components/BaseScreen';
 import { LastUpdatedLabel } from '../components/LastUpdatedLabel';
 import { useCnbRates } from '../features/finance/hooks/useCnbRates';
-import type { Rate } from '../features/finance/types';
+
+const Content = styled.View`
+  flex: 1;
+`;
+
+const ItemCard = styled.View`
+  flex-direction: row;
+  padding: 14px;
+  border-radius: 12px;
+  background-color: #fff;
+  margin-bottom: 10px;
+
+  shadow-color: #000;
+  shadow-opacity: 0.05;
+  shadow-radius: 6px;
+  shadow-offset: 0px 2px;
+
+  elevation: 1;
+`;
+
+const Code = styled.Text`
+  flex: 1.2;
+  font-size: 12px;
+  font-weight: 700;
+`;
+
+const Country = styled.Text`
+  flex: 1;
+  font-size: 12px;
+  text-align: center;
+  color: #666;
+`;
+
+const Amount = styled.Text`
+  flex: 1.8;
+  font-size: 12px;
+  text-align: right;
+  font-weight: 600;
+`;
 
 function RatesScreen() {
-  const { data, error, isLoading, dataUpdatedAt, refetch } = useCnbRates();
-
-  const renderItem = ({ item }: { item: Rate }) => {
-    return (
-      <View style={styles.item}>
-        <Text style={styles.code}>
-          {item.code} ({item.currency})
-        </Text>
-
-        <Text style={styles.country}>{item.country}</Text>
-
-        <Text style={styles.amount}>
-          {item.amount} ~ {item.rate.toFixed(2)} CZK
-        </Text>
-      </View>
-    );
-  };
+  const { data, error, isFetching, isLoading, dataUpdatedAt, refetch } =
+    useCnbRates();
 
   return (
-    <BaseScreen
-      error={error}
-      isLoading={isLoading}
-      containerStyle={styles.container}
-    >
-      <FlatList
-        onRefresh={refetch}
-        refreshing={isLoading}
-        renderItem={renderItem}
-        data={data?.rates ?? []}
-        showsVerticalScrollIndicator={false}
-      />
+    <BaseScreen error={error} isLoading={isLoading}>
+      <Content>
+        <FlatList
+          data={data?.rates ?? []}
+          keyExtractor={(item) => item.code}
+          onRefresh={refetch}
+          refreshing={isFetching}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <ItemCard>
+              <Code numberOfLines={1}>
+                {item.code} ({item.currency})
+              </Code>
+
+              <Country numberOfLines={1}>{item.country}</Country>
+
+              <Amount numberOfLines={1}>
+                {item.amount} ~ {item.rate.toFixed(2)} CZK
+              </Amount>
+            </ItemCard>
+          )}
+        />
+      </Content>
+
       <LastUpdatedLabel updatedAt={dataUpdatedAt} />
     </BaseScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingTop: 0,
-    justifyContent: 'space-between',
-  },
-  code: { flex: 1 },
-  country: { flex: 1, textAlign: 'center' },
-  amount: { flex: 1, textAlign: 'right' },
-  item: {
-    flexDirection: 'row',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-  },
-});
 
 export { RatesScreen };

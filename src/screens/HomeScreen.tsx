@@ -1,40 +1,58 @@
 import { useNavigation } from '@react-navigation/native';
-import { Button, StyleSheet, View } from 'react-native';
+import styled from 'styled-components/native';
 import { BaseScreen } from '../components/BaseScreen';
+import { FeatureCard } from '../components/FeatureCard';
 import { LastUpdatedLabel } from '../components/LastUpdatedLabel';
 import { useCnbRates } from '../features/finance/hooks/useCnbRates';
+
+const Content = styled.View`
+  flex: 1;
+`;
+
+const Header = styled.Text`
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 6px;
+`;
+
+const Subheader = styled.Text`
+  font-size: 15px;
+  color: #666;
+  margin-bottom: 24px;
+`;
+
+const Cards = styled.View`
+  gap: 16px;
+`;
 
 function HomeScreen() {
   const navigation = useNavigation();
   const { dataUpdatedAt } = useCnbRates();
 
-  const handleConverterPress = () => {
-    navigation.navigate('Converter');
-  };
-
-  const handleRatesPress = () => {
-    navigation.navigate('Rates');
-  };
-
   return (
-    <BaseScreen containerStyle={styles.container}>
-      <View style={styles.buttonsContainer}>
-        <Button title="Currency Converter" onPress={handleConverterPress} />
-        <Button title="View Rates" onPress={handleRatesPress} />
-      </View>
+    <BaseScreen>
+      <Content>
+        <Header>Currency Tools</Header>
+        <Subheader>Convert CZK and browse exchange rates</Subheader>
+
+        <Cards>
+          <FeatureCard
+            title="Currency Converter"
+            subtitle="Quick CZK conversion"
+            onPress={() => navigation.navigate('Converter')}
+          />
+
+          <FeatureCard
+            title="View Rates"
+            subtitle="Browse all currencies"
+            onPress={() => navigation.navigate('Rates')}
+          />
+        </Cards>
+      </Content>
 
       <LastUpdatedLabel updatedAt={dataUpdatedAt} />
     </BaseScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    justifyContent: 'space-between',
-  },
-  buttonsContainer: {
-    gap: 16,
-  },
-});
 
 export { HomeScreen };
