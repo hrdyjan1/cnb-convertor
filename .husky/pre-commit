@@ -1,1 +1,4 @@
+#!/usr/bin/env sh
+
 npm run biome:check
+npm test

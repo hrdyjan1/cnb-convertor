@@ -3,12 +3,11 @@ import { useDebounceValue } from '../../../hooks/useDebounceValue';
 import { convertFromCZK } from '../../../utils/convertFromCZK';
 import { isDefined } from '../../../utils/isDefined';
 import { toNumber } from '../../../utils/toNumber';
-import type { Rate } from '../types';
 
 export function useCurrencyConversion(
   czkInput: string,
   currency: string,
-  rates: Rate[] = [],
+  rates: { rate: number | null; amount: number | null; code: string }[] = [],
 ) {
   const debouncedCzkInput = useDebounceValue(czkInput, 500);
   const [result, setResult] = useState<number | null>(null);

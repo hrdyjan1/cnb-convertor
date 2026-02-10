@@ -2,7 +2,7 @@ import * as v from 'valibot';
 import { toNumber } from '../../../utils/toNumber';
 import { RateSchema, RatesResponseSchema } from '../schema/cnbSchema';
 
-const HEADER_LINES = 2;
+const HEADER_LINES = 1;
 const DELIMITER = '|';
 const CNB_URL =
   'https://www.cnb.cz/en/financial-markets/foreign-exchange-market/' +
@@ -27,12 +27,12 @@ function parseRate(line: string) {
 }
 
 async function fetchCnbRates() {
-  const res = await fetch(CNB_URL);
-  if (!res.ok) {
+  const result = await fetch(CNB_URL);
+  if (!result.ok) {
     throw new Error('Failed to fetch CNB rates');
   }
 
-  const text = await res.text();
+  const text = await result.text();
   const [date, ...lines] = text.trim().split('\n');
   const rates = lines.slice(HEADER_LINES).map(parseRate);
   const parsed = { date, base: 'CZK', rates };
