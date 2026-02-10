@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import * as v from 'valibot';
 import { toNumber } from '../../../utils/toNumber';
 import { RateSchema, RatesResponseSchema } from '../schema/cnbSchema';
@@ -7,8 +8,15 @@ const DELIMITER = '|';
 const CNB_URL =
   'https://www.cnb.cz/en/financial-markets/foreign-exchange-market/' +
   'central-bank-exchange-rate-fixing/central-bank-exchange-rate-fixing/daily.txt';
+const CORS_PROXY = 'https://corsproxy.io/?';
 
-function parseRate(line: string) {
+function getCnbUrl(): string {
+  return Platform.OS === 'web'
+    ? `${CORS_PROXY}${encodeURIComponent(CNB_URL)}`
+    : CNB_URL;
+}
+
+function parseRateLine(line: string) {
   const parts = line.split(DELIMITER);
 
   if (parts.length !== 5) {
@@ -26,16 +34,25 @@ function parseRate(line: string) {
   });
 }
 
+function parseRatesText(text: string) {
+  const [date, ...lines] = text.trim().split('\n');
+  const rates = lines.slice(HEADER_LINES).map(parseRateLine);
+
+  return { date, base: 'CZK' as const, rates };
+}
+
 async function fetchCnbRates() {
-  const result = await fetch(CNB_URL);
-  if (!result.ok) {
-    throw new Error('Failed to fetch CNB rates');
+  const url = getCnbUrl();
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch CNB rates: ${response.status} ${response.statusText}`,
+    );
   }
 
-  const text = await result.text();
-  const [date, ...lines] = text.trim().split('\n');
-  const rates = lines.slice(HEADER_LINES).map(parseRate);
-  const parsed = { date, base: 'CZK', rates };
+  const text = await response.text();
+  const parsed = parseRatesText(text);
 
   return v.parse(RatesResponseSchema, parsed);
 }
